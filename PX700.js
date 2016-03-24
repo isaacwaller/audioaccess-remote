@@ -134,7 +134,9 @@ class PX700 extends EventEmitter {
     }
 
     var systemCode = buffer[1]; // Ignored for now
-    var zoneCode = buffer[2]; // Ignored for now
+    var zoneCode = buffer[2];
+
+    var zone = zoneCode & 7; // last 3 bits is zone code
 
     var deviceTypeByte = buffer[3], deviceType;
     switch (deviceTypeByte) {
@@ -174,6 +176,7 @@ class PX700 extends EventEmitter {
     }
 
     var msg = {
+      zone: zone,
       deviceType: deviceType,
       command: commandName
     };
@@ -236,7 +239,6 @@ class PX700 extends EventEmitter {
       string += data;
     }
 
-    console.log("Sending command " + string);
     var checksum = -(string.split(' ').map(function (s) { return parseInt(s, 16); }).reduce((a, b) => a + b, 0) + 1) & 0xFF;
     var self = this;
 
@@ -250,7 +252,6 @@ class PX700 extends EventEmitter {
         }
 
         if (msg.command == command) {
-          console.log("Got echo");
           // Good echo
           if (skipAck) {
             callback();
@@ -302,8 +303,8 @@ class PX700 extends EventEmitter {
     });
   }
 
-  selectTuner(zone, callback) {
-    this.sendCommand(zone, 'select-tuner', null, callback);
+  selectSource(zone, source, callback) {
+    this.sendCommand(zone, 'select-' + source, null, callback);
   }
 
   getMainRoomStatus(zone, callback) {

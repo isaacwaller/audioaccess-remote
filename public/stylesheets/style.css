@@ -1,8 +1,39 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+.header {
+  background-color: #003399;
+  color: white;
+}
+
+.header h2 {
+  margin: 16px 0px;
+  font-size: 12pt;
+}
+
+.sidebar-room {
+  border: 1px solid #aaaaaa;
+  background-color: #eeeeee;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 3px;
+}
+
+.sidebar-room.active {
+  border: 1px solid #003399;
+  background-color: #ccddff;
+}
+
+.sidebar-room h3 {
+  margin: 0;
+  padding-bottom: 8px;
+}
+
+.sidebar-room div {
+  height: 20px;
 }
