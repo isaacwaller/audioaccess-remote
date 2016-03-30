@@ -99,7 +99,7 @@ const CondiCommandDataLengths = {
   }
 };
 
-const MESSAGE_SPACING = 100;
+const MESSAGE_SPACING = 50;
 const ACK_TIMEOUT = 5000;
 
 class PX700 extends EventEmitter {
@@ -128,6 +128,10 @@ class PX700 extends EventEmitter {
 
   parseIncomingData(buffer) {
 
+    if (buffer.length < 5) {
+      console.log("Message too short (" + buffer.length + "), skipping message");
+      return;
+    }
     if (buffer[0] != 0x7E) {
       console.log("Recieved bad preamble, skipping message");
       return;
@@ -162,7 +166,7 @@ class PX700 extends EventEmitter {
 
     var data;
     var dataLength = 0;
-    if (CondiCommandDataLengths[deviceTypeByte][command]) {
+    if (CondiCommandDataLengths[deviceTypeByte] && CondiCommandDataLengths[deviceTypeByte][command]) {
       dataLength = CondiCommandDataLengths[deviceTypeByte][command];
       data = buffer.slice(5, 5 + dataLength);
     }
@@ -170,7 +174,7 @@ class PX700 extends EventEmitter {
     var checksum = buffer[5 + dataLength];
     // TODO verify checksum
 
-    var commandName = CondiCommandNames[deviceTypeByte][command];
+    var commandName = CondiCommandNames[deviceTypeByte] ? CondiCommandNames[deviceTypeByte][command] : null;
     if (!commandName) {
       commandName = 'unknown (' + command.toString(16) + ')';
     }
@@ -186,6 +190,7 @@ class PX700 extends EventEmitter {
     }
 
     this.emit('message', msg);
+    this.emit(deviceType + '-message', msg);
     // Used for not sending messages while others are using the connection
     this.lastMessageReceiveTime = new Date();
 
@@ -230,10 +235,18 @@ class PX700 extends EventEmitter {
     });
   }
 
-  sendCommand(zone, command, data, callback, skipAck) {
+  sendCommand(zone, command, data, callback, skipAck, deviceType) {
     // First, create command string
     var commandByte = ("0" + ComputerCommands[command].toString(16)).substr(-2);
-    var string = "7E 10 0" + zone + " 04 " + commandByte;
+
+    var deviceTypeByte;
+    if (deviceType == 'keypad') {
+      deviceTypeByte = "01";
+    } else {
+      deviceTypeByte = "04"; // computer
+    }
+
+    var string = "7E 10 0" + zone + " " + deviceTypeByte + " " + commandByte;
     if (data) {
       string += " ";
       string += data;
@@ -245,7 +258,7 @@ class PX700 extends EventEmitter {
     // Send command, then wait for echo and ACK
     this.sendString(string + checksum.toString(16), function (err) {
       // Should get echo first
-      self.onceTimeout('message', ACK_TIMEOUT, function (err, msg) {
+      self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
         if (err) {
           callback(err);
           return;
@@ -257,7 +270,7 @@ class PX700 extends EventEmitter {
             callback();
           } else {
             // Wait for ACK
-            self.onceTimeout('message', ACK_TIMEOUT, function (err, msg) {
+            self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
               if (err) {
                 callback(err);
                 return;
@@ -313,14 +326,14 @@ class PX700 extends EventEmitter {
       if (err) {
         callback(err);
       } else {
-        self.onceTimeout('message', ACK_TIMEOUT, function (err, msg) {
+        self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
           if (err) {
             callback(err);
             return;
           }
 
           if (msg.command != 'main-room-status-response') {
-            callback(new Error("received bad response"));
+            callback(new Error("received bad response: " + msg.command));
           } else {
             // Parse main room status response.
             var sourceByte = msg.data[0];
@@ -343,6 +356,9 @@ class PX700 extends EventEmitter {
               break;
             case 0x05:
               source = "video";
+              break;
+            case 0x06:
+              source = "page";
               break;
             }
 

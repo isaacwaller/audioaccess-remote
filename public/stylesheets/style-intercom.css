@@ -1,0 +1,57 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.header {
+  background-color: #6699ff;
+  color: white;
+}
+
+.header h2 {
+  margin: 16px 0px;
+  font-size: 12pt;
+}
+
+.intercom-button {
+  text-align: center;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+  border-radius: 999px;
+  font-size: 50pt;
+  padding-top: 39px;
+  margin-top: 50px;
+  color: white;
+  cursor: pointer;
+}
+
+.intercom-button.connecting {
+  background-color: #dddddd;
+}
+
+.intercom-button.connected {
+  background-color: #4CD964;
+}
+
+.intercom-button.calling {
+  background-color: #c0f2c8;
+}
+
+.intercom-button.in-call {
+  background-color: #FF3B30;
+}
+
+.intercom-button span {
+  pointer-events:none;
+}
+
+.error {
+  font-size: 12pt;
+  color: red;
+  text-align: center;
+  padding-top: 16px;
+}

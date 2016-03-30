@@ -23,6 +23,7 @@
     "react-dom": "^0.14.7",
     "serialport": "^2.0.6",
     "serve-favicon": "~2.3.0",
+    "sip.js": "^0.7.3",
     "socket.io": "^1.4.5"
   },
   "devDependencies": {

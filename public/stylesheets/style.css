@@ -16,12 +16,17 @@ a {
   font-size: 12pt;
 }
 
+.sidebar {
+  padding-top: 30px;
+}
+
 .sidebar-room {
   border: 1px solid #aaaaaa;
   background-color: #eeeeee;
-  padding: 8px;
+  padding: 16px;
   margin: 8px;
   border-radius: 3px;
+  cursor: pointer;
 }
 
 .sidebar-room.active {
@@ -30,10 +35,52 @@ a {
 }
 
 .sidebar-room h3 {
+  font-size: 20px;
   margin: 0;
   padding-bottom: 8px;
 }
 
-.sidebar-room div {
+.sidebar-room .subtitle {
   height: 20px;
+}
+
+.sidebar-room-icon {
+  width: 20px;
+  float: right;
+  margin-right: 8px;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 54px;
+}
+
+.icon-airplay {
+  background-image: url(/images/airplay.png);
+  background-size: contain;
+}
+
+.icon-google-cast {
+  background-image: url(/images/google-cast.svg);
+  background-size: contain;
+}
+
+.room-keypad {
+  margin: 8px;
+}
+
+.room-back {
+  cursor: pointer;
+  padding-top: 16px;
+}
+
+.room-source {
+  cursor: pointer;
+  background-color: #eeeeee;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.room-source[data-active="true"] {
+  background-color: #003399;
+  color: white;
 }

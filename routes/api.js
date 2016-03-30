@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 var PX700 = require('../PX700');
 var merge = require('merge');
+var async = require('async');
+
+const PAGE_VOLUME = 190;
 
 // Create serial connection.
 var px = new PX700("COM3"); // TODO: use ENV variable for this
@@ -78,6 +81,7 @@ router.post('/rooms/:room/volume', function (req, res, next) {
 // Websocket
 var wsConnections = [];
 px.on('message', function (msg) {
+  console.log(msg.deviceType + ": " + msg.command);
   if (msg.deviceType != "keypad" || msg.command == "acknowledge") {
     return;
   }
@@ -92,7 +96,7 @@ router.ioStarted = function (io) {
     wsConnections.push(socket);
   });
   io.on('disconnect', function (socket) {
-    wsConnections.splice(wsConnections.indexOf(socket), 1);
+    wsConnections = wsConnections.splice(wsConnections.indexOf(socket), 1);
   });
 };
 

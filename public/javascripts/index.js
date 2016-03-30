@@ -5,6 +5,12 @@ var async = require('async');
 
 var RoomsDisplay = require('./roomsdisplay');
 
+function onSourceSelected(roomId) {
+  return function (source) {
+    return function () { makeTuneRequest(roomId, source); };
+  };
+}
+
 // connecting - making initial requests
 // connected - connected ws
 var connectionState = "connecting";
@@ -17,7 +23,7 @@ var rooms = [
 ];
 var roomsdisplay = null;
 function renderDisplay() {
-  roomsdisplay = ReactDOM.render(<RoomsDisplay rooms={rooms} />, document.getElementById('roomsdisplay'));
+  roomsdisplay = ReactDOM.render(<RoomsDisplay rooms={rooms} onSourceSelected={onSourceSelected} />, document.getElementById('roomsdisplay'));
 }
 renderDisplay();
 
@@ -31,6 +37,28 @@ function updateAllData() {
 }
 function updateRoomData(roomId, callback) {
   request({ url: '/api/rooms/' + roomId, json: true }, function (err, response) {
+    if (err) {
+      // TODO show error
+      return;
+    }
+
+    rooms[roomId - 1] = response.body;
+    renderDisplay();
+    if (callback) {
+      callback();
+    }
+  });
+}
+function makeTuneRequest(roomId, source, callback) {
+  var params = { method: "POST", json: true };
+  if (source == "off") {
+    params.url = '/api/rooms/' + roomId + '/turn-off';
+    params.body = {};
+  } else {
+    params.url = '/api/rooms/' + roomId + '/tune';
+    params.body = { source: source };
+  }
+  request(params, function (err, response) {
     if (err) {
       // TODO show error
       return;
