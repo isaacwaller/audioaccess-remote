@@ -5,11 +5,11 @@ var IntercomButton = require('./intercom-button');
 
 var config = {
   // Replace this IP address with your Asterisk IP address
-  uri: 'webrtc@wallerfamily.name',
+  uri: 'webrtc@192.168.1.12',
 
   // Replace this IP address with your Asterisk IP address,
   // and replace the port with your Asterisk port from the http.conf file
-  ws_servers: 'ws://wallerfamily.name:8088/ws',
+  ws_servers: 'ws://192.168.1.12:8088/ws',
   authorizationUser: 'webrtc',
   password: 'webrtc',
   iceCheckingTimeout: 1000
