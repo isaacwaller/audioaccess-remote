@@ -2,8 +2,15 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var request = require('browser-request');
 var async = require('async');
+var attachFastClick = require('fastclick');
 
 var RoomsDisplay = require('./roomsdisplay');
+
+if ('addEventListener' in document) {
+    document.addEventListener('DOMContentLoaded', function() {
+        attachFastClick(document.body);
+    }, false);
+}
 
 function onSourceSelected(roomId) {
   return function (source) {
@@ -154,7 +161,7 @@ function makeVolumeRequest(roomId, level, callback, force) {
 updateAllData();
 
 // websocket
-var socket = io('http://192.168.1.105:3000');
+var socket = io('http://192.168.1.12:3000');
 socket.on('dirty', function (roomId) {
   if (connectionState == "connected") {
     // refresh the given room

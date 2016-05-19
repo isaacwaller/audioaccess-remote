@@ -5,6 +5,7 @@
 
 body {
   font-family: 'Open Sans', sans-serif;
+  -webkit-overflow-scrolling: auto;
 }
 
 a {
@@ -20,6 +21,10 @@ a {
   z-index: 100;
 }
 
+.standalone .header {
+  padding-top: 20px;
+}
+
 .header h2 {
   margin: 16px 0px;
   font-size: 12pt;
@@ -28,6 +33,10 @@ a {
 
 .sidebar {
   padding-top: 65px;
+}
+
+.standalone .sidebar {
+  padding-top: 85px;
 }
 
 .sidebar-all {
