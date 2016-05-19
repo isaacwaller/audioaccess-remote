@@ -5,7 +5,7 @@ var merge = require('merge');
 var async = require('async');
 
 // Create serial connection.
-var px = new PX700("COM3"); // TODO: use ENV variable for this
+var px = new PX700(process.env.SERIAL_PORT || "COM3");
 px.on('ready', function () {
   console.log("PX700 connection ready.");
 });
