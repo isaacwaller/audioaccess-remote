@@ -100,7 +100,7 @@ const CondiCommandDataLengths = {
 };
 
 const MESSAGE_SPACING = 50;
-const ACK_TIMEOUT = 5000;
+const ACK_TIMEOUT = 2000;
 
 class PX700 extends EventEmitter {
   // Create new connection, do not use until you have received the 'ready'

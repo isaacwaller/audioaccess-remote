@@ -10,12 +10,23 @@ var RoomsDisplay = React.createClass({
     // Sidebar
     var sidebar;
     if (this.state.withKeypad) {
-      sidebar = <RoomKeypad room={this.props.rooms[this.state.withKeypad - 1]}
-        onBack={this.dismissKeypad}
-        onVolumeChange={this.props.onVolumeChange(this.state.withKeypad)}
-        onSourceSelected={this.props.onSourceSelected(this.state.withKeypad)} />;
+      if (this.state.withKeypad == -1) {
+        // Control all rooms
+        sidebar = <RoomKeypad controlAll={true}
+          onBack={this.dismissKeypad}
+          onVolumeChange={this.props.onVolumeChangeForAll}
+          onSourceSelected={this.props.onSourceForAllSelected} />;
+      } else {
+        sidebar = <RoomKeypad room={this.props.rooms[this.state.withKeypad - 1]}
+          onBack={this.dismissKeypad}
+          onVolumeChange={this.props.onVolumeChange(this.state.withKeypad)}
+          onSourceSelected={this.props.onSourceSelected(this.state.withKeypad)} />;
+      }
     } else {
       sidebar = <div>
+        <div className="sidebar-all" onClick={function () { this.showKeypad(-1) }.bind(this)}>
+          Control All
+        </div>
         {this.props.rooms.map(function (room) {
           var summary;
           switch (room.source) {

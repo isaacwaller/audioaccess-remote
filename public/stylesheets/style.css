@@ -15,6 +15,9 @@ a {
   background-color: #003399;
   color: white;
   text-align: center;
+  position: fixed;
+  width: 100%;
+  z-index: 100;
 }
 
 .header h2 {
@@ -24,7 +27,17 @@ a {
 
 
 .sidebar {
-  padding-top: 15px;
+  padding-top: 65px;
+}
+
+.sidebar-all {
+  border: 1px solid #cccccc;
+  background-color: #ffffff;
+  padding: 8px 16px 8px 16px;
+  margin: 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: center;
 }
 
 .sidebar-room {
@@ -90,6 +103,27 @@ a {
 .room-source[data-active="true"] {
   background-color: #003399;
   color: white;
+}
+
+@keyframes all-source {
+    0% {
+        background-color: #003399;
+        color: white;
+    }
+    100% {
+        background-color: #eeeeee;
+        color: black;
+    }
+}
+
+.room-keypad-all .room-source[data-active="true"] {
+  animation-name: all-source;
+  animation-duration: 400ms;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in-out;
+  
+  background-color: #eeeeee;
+  color: black;
 }
 
 .map {

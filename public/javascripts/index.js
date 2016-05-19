@@ -16,6 +16,44 @@ function onVolumeChange(roomId) {
   }
 }
 
+function onSourceForAllSelected(source) {
+  var spacing = 200;
+  async.eachSeries(rooms, function (room, callback) {
+    makeTuneRequest(room.id, source, function () {
+      setTimeout(callback, spacing);
+    });
+  }, function done() {
+    console.log("Done tuning all to " + source);
+  });
+}
+
+var volumeAllChangeInProgress = false;
+var volumeAllChangeLevel;
+
+function onVolumeChangeForAll(level) {
+  if (volumeAllChangeInProgress) {
+    volumeAllChangeLevel = level;
+    return;
+  }
+  volumeAllChangeInProgress = true;
+  
+  var spacing = 150;
+  async.eachSeries(rooms, function (room, callback) {
+    makeVolumeRequest(room.id, level, function () {
+      setTimeout(callback, spacing);
+    }, true); // force
+  }, function done() {
+    console.log("Done changing volume for all");
+    
+    volumeAllChangeInProgress = false;
+    var newLevel = volumeAllChangeLevel;
+    if (newLevel) {
+      volumeAllChangeLevel = null;
+      onVolumeChangeForAll(newLevel);
+    }
+  });
+}
+
 // connecting - making initial requests
 // connected - connected ws
 var connectionState = "connecting";
@@ -30,7 +68,9 @@ var roomsdisplay = null;
 function renderDisplay() {
   roomsdisplay = ReactDOM.render(<RoomsDisplay rooms={rooms}
     onSourceSelected={onSourceSelected}
-    onVolumeChange={onVolumeChange} />, document.getElementById('roomsdisplay'));
+    onSourceForAllSelected={onSourceForAllSelected}
+    onVolumeChange={onVolumeChange}
+    onVolumeChangeForAll={onVolumeChangeForAll} />, document.getElementById('roomsdisplay'));
 }
 renderDisplay();
 
@@ -85,6 +125,7 @@ var latestVolumeRequests = {};
 function makeVolumeRequest(roomId, level, callback, force) {
   if (inProgressVolumeRequests[roomId] && !force) {
     latestVolumeRequests[roomId] = level;
+    callback();
     return;
   }
   inProgressVolumeRequests[roomId] = true;

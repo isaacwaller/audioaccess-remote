@@ -6,13 +6,22 @@ var RoomKeypad = React.createClass({
   },
 
   render: function () {
-    var source = this.state.source || this.props.room.source;
-    var volume = this.state.volume || this.props.room.volume || 0;
-    return <div className="room-keypad">
+    var controlAll = this.props.controlAll;
+    var source, volume, name, clazz = "room-keypad";
+    if (!controlAll) {
+      source = this.state.source || this.props.room.source;
+      volume = this.state.volume || this.props.room.volume || 0;
+      name = this.props.room.name;
+    } else {
+      name = "All rooms";
+      source = this.state.source;
+      clazz = "room-keypad room-keypad-all"
+    }
+    return <div className={clazz}>
       <div className="room-back" onClick={this.props.onBack}><span className="glyphicon glyphicon-menu-left" aria-hidden="true"></span> Back</div>
-      <h3>{this.props.room.name}</h3>
+      <h3>{name}</h3>
       <div className="room-sources">
-        <div className="room-source" data-active={source == "off" || !source} onClick={this.sourceSelected("off")}>Off</div>
+        <div className="room-source" data-active={source == "off"} onClick={this.sourceSelected("off")}>Off</div>
         <div className="room-source" data-active={source == "tuner"} onClick={this.sourceSelected("tuner")}>FM Radio</div>
         <div className="room-source" data-active={source == "cd"} onClick={this.sourceSelected("cd")}>CD</div>
         <div className="room-source" data-active={source == "tape"} onClick={this.sourceSelected("tape")}>AirPlay</div>
@@ -29,6 +38,9 @@ var RoomKeypad = React.createClass({
       self.props.onSourceSelected(source);
       setTimeout(function () {
         // Clear temp state
+        // 2 functions - if it failed, it will reflect it
+        // If you tune from physical keypad it will not be overriden by state
+        // Also animation for all rooms keyboard
         self.setState({ source: null });
       }, 1000);
     };
