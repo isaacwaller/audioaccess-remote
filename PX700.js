@@ -284,7 +284,7 @@ class PX700 extends EventEmitter {
             });
           }
         } else {
-          callback(new Error("Bad echo", msg));
+          callback(new Error("Bad echo (got " + msg.command + ", expecting " + command + ")", msg));
         }
       });
     });

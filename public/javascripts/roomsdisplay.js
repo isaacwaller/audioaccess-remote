@@ -12,6 +12,7 @@ var RoomsDisplay = React.createClass({
     if (this.state.withKeypad) {
       sidebar = <RoomKeypad room={this.props.rooms[this.state.withKeypad - 1]}
         onBack={this.dismissKeypad}
+        onVolumeChange={this.props.onVolumeChange(this.state.withKeypad)}
         onSourceSelected={this.props.onSourceSelected(this.state.withKeypad)} />;
     } else {
       sidebar = <div>
@@ -31,7 +32,7 @@ var RoomsDisplay = React.createClass({
             summary = "Playing AirPlay";
             break;
           case "aux":
-            summary = "Playing intercom";
+            summary = "Playing AUX";
             break;
           case "video":
             summary = "Playing Google Cast";
@@ -61,10 +62,10 @@ var RoomsDisplay = React.createClass({
 
 
     return <div>
-      <div className="col-xs-8 map">
+      <div className="col-sm-8 map">
 
       </div>
-      <div className="col-xs-4 sidebar">
+      <div className="col-sm-4 sidebar">
         {sidebar}
       </div>
     </div>;

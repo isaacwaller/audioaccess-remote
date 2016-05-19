@@ -7,8 +7,13 @@ var RoomsDisplay = require('./roomsdisplay');
 
 function onSourceSelected(roomId) {
   return function (source) {
-    return function () { makeTuneRequest(roomId, source); };
+    makeTuneRequest(roomId, source);
   };
+}
+function onVolumeChange(roomId) {
+  return function (level) {
+    makeVolumeRequest(roomId, level);
+  }
 }
 
 // connecting - making initial requests
@@ -17,13 +22,15 @@ var connectionState = "connecting";
 var rooms = [
   { id: 1, name: "Living Room" },
   { id: 2, name: "Kitchen" },
-  { id: 3, name: "Stella's Room" },
-  { id: 4, name: "Master Bedroom" },
+  { id: 3, name: "Master Bedroom" },
+  { id: 4, name: "Stella's Room" },
   { id: 5, name: "Joe's Room" }
 ];
 var roomsdisplay = null;
 function renderDisplay() {
-  roomsdisplay = ReactDOM.render(<RoomsDisplay rooms={rooms} onSourceSelected={onSourceSelected} />, document.getElementById('roomsdisplay'));
+  roomsdisplay = ReactDOM.render(<RoomsDisplay rooms={rooms}
+    onSourceSelected={onSourceSelected}
+    onVolumeChange={onVolumeChange} />, document.getElementById('roomsdisplay'));
 }
 renderDisplay();
 
@@ -71,13 +78,52 @@ function makeTuneRequest(roomId, source, callback) {
     }
   });
 }
+
+var inProgressVolumeRequests = {};
+var latestVolumeRequests = {};
+
+function makeVolumeRequest(roomId, level, callback, force) {
+  if (inProgressVolumeRequests[roomId] && !force) {
+    latestVolumeRequests[roomId] = level;
+    return;
+  }
+  inProgressVolumeRequests[roomId] = true;
+  
+  var params = { method: "POST", json: true, url: '/api/rooms/' + roomId + '/volume', body: { level: level } };
+  request(params, function (err, response) {
+    if (err) {
+      // TODO show error
+      console.log(err);
+      return;
+    }
+
+    var newVolRequest = latestVolumeRequests[roomId];
+    if (newVolRequest) {
+      latestVolumeRequests[roomId] = null;
+      makeVolumeRequest(roomId, newVolRequest, callback, true);
+      return;
+    }
+    inProgressVolumeRequests[roomId] = false;
+  
+    if (callback) {
+      callback();
+    }
+  });
+}
 updateAllData();
 
 // websocket
-var socket = io('http://localhost:3000');
+var socket = io('http://192.168.1.105:3000');
 socket.on('dirty', function (roomId) {
   if (connectionState == "connected") {
     // refresh the given room
     updateRoomData(roomId);
+  }
+});
+socket.on('data-push', function (roomId, body) {
+  if (connectionState == "connected") {
+    // got new data, update
+    rooms[roomId - 1] = body;
+    renderDisplay();
   }
 });
