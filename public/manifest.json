@@ -1,0 +1,14 @@
+{
+  "short_name": "Music Remote",
+  "name": "Music Remote",
+  "icons": [
+    {
+      "src": "/images/app-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait"
+}
