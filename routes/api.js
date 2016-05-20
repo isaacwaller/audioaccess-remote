@@ -39,7 +39,7 @@ var rooms = [
 // Websocket
 var wsConnections = [];
 px.on('message', function (msg) {
-  console.log(msg.deviceType + ": " + msg.command);
+  console.log(msg.deviceType + " (" + msg.zone + "): " + msg.command);
   if (msg.deviceType != "keypad" || msg.command == "acknowledge") {
     return;
   }

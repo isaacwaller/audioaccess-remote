@@ -286,7 +286,7 @@ class PX700 extends EventEmitter {
           return;
         }
 
-        if (msg.command == command) {
+        if (msg.command == command && msg.zone == zone) {
           // Good echo
           n++;
           if (n == 2 || skipAck) {
@@ -307,7 +307,7 @@ class PX700 extends EventEmitter {
             return;
           }
 
-          if (msg.command == 'acknowledge') {
+          if (msg.command == 'acknowledge' && msg.zone == zone) {
             // Good ACK
             n++;
             if (n == 2) {
@@ -361,7 +361,7 @@ class PX700 extends EventEmitter {
         return;
       }
 
-      if (msg.command != 'main-room-status-response') {
+      if (msg.command != 'main-room-status-response' || msg.zone != zone) {
         return true; // Keep waiting
       } else {
         // Parse main room status response.
