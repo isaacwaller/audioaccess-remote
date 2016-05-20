@@ -230,7 +230,7 @@ class PX700 extends EventEmitter {
       
       if (!continueListening) {
         clearTimeout(timer);
-        self.removeListener(handler);
+        self.removeListener(this);
       }
     };
 
