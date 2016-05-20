@@ -222,21 +222,26 @@ class PX700 extends EventEmitter {
   onceTimeout(event, timeout, callback) {
     var timer;
     var self = this;
+    var done = false;
 
     var handler = function () {
+      if (done) {
+        return;
+      }
       var args = Array.prototype.slice.call(arguments);
       args.unshift(null); // 'err'
       var continueListening = callback.apply(this, args);
       
       if (!continueListening) {
-        clearTimeout(timer);
-        self.removeListener(this);
+        done = true;
       }
     };
 
     timer = setTimeout(function () {
       self.removeListener(event, handler);
-      callback(new Error("Timed out"));
+      if (!done) {
+        callback(new Error("Timed out"));
+      }
     }, timeout);
 
     self.on(event, handler);
@@ -352,54 +357,56 @@ class PX700 extends EventEmitter {
 
   getMainRoomStatus(zone, callback) {
     var self = this;
+    // Start listening before sending command in case they arrive out of order
+    self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      if (msg.command != 'main-room-status-response') {
+        return true; // Keep waiting
+      } else {
+        // Parse main room status response.
+        var sourceByte = msg.data[0];
+        var source;
+        switch (sourceByte) {
+        case 0x00:
+          source = "off";
+          break;
+        case 0x01:
+          source = "tuner";
+          break;
+        case 0x02:
+          source = "cd";
+          break;
+        case 0x03:
+          source = "tape";
+          break;
+        case 0x04:
+          source = "aux";
+          break;
+        case 0x05:
+          source = "video";
+          break;
+        case 0x06:
+          source = "page";
+          break;
+        }
+
+        callback(null, {
+          source: source,
+          volume: msg.data[1],
+          bass: msg.data[2],
+          treble: msg.data[3]
+        });
+      }
+    });
     this.sendCommand(zone, 'main-room-status-request', null, function (err) {
       if (err) {
         callback(err);
       } else {
-        self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
-          if (err) {
-            callback(err);
-            return;
-          }
-
-          if (msg.command != 'main-room-status-response') {
-            callback(new Error("received bad response: " + msg.command));
-          } else {
-            // Parse main room status response.
-            var sourceByte = msg.data[0];
-            var source;
-            switch (sourceByte) {
-            case 0x00:
-              source = "off";
-              break;
-            case 0x01:
-              source = "tuner";
-              break;
-            case 0x02:
-              source = "cd";
-              break;
-            case 0x03:
-              source = "tape";
-              break;
-            case 0x04:
-              source = "aux";
-              break;
-            case 0x05:
-              source = "video";
-              break;
-            case 0x06:
-              source = "page";
-              break;
-            }
-
-            callback(null, {
-              source: source,
-              volume: msg.data[1],
-              bass: msg.data[2],
-              treble: msg.data[3]
-            });
-          }
-        });
+        // See above for callback
       }
     }, true); // Do not wait for ACK
   }
