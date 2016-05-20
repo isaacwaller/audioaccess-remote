@@ -115,9 +115,22 @@ class PX700 extends EventEmitter {
     });
 
     var self = this;
+    var buffer = null;
     serialPort.on("open", function () {
       serialPort.on('data', function(data) {
-        self.parseIncomingData(data);
+        if (buffer == null) {
+          buffer = data;
+        } else {
+          buffer = Buffer.concat([buffer, data]);
+        }
+
+        var bytesUsed = self.parseIncomingData(buffer);
+        if (bytesUsed == -1) {
+          // Clear buffer
+          buffer = null;
+        } else {
+          buffer = buffer.slice(bytesUsed);
+        }
       });
 
       self.emit('ready');
@@ -129,12 +142,12 @@ class PX700 extends EventEmitter {
   parseIncomingData(buffer) {
 
     if (buffer.length < 5) {
-      console.log("Message too short (" + buffer.length + "), skipping message");
-      return;
+      //console.log("Message too short (" + buffer.length + "), skipping message");
+      return 0; // Still too short
     }
     if (buffer[0] != 0x7E) {
       console.log("Recieved bad preamble, skipping message");
-      return;
+      return -1;
     }
 
     var systemCode = buffer[1]; // Ignored for now
@@ -168,6 +181,9 @@ class PX700 extends EventEmitter {
     var dataLength = 0;
     if (CondiCommandDataLengths[deviceTypeByte] && CondiCommandDataLengths[deviceTypeByte][command]) {
       dataLength = CondiCommandDataLengths[deviceTypeByte][command];
+      if (buffer.length < (5 + dataLength)) {
+        return 0; // Entire message not yet received
+      }
       data = buffer.slice(5, 5 + dataLength);
     }
 
@@ -198,6 +214,8 @@ class PX700 extends EventEmitter {
       // additional commands
       this.parseIncomingData(buffer.slice(6 + dataLength));
     }
+    
+    return 5 + dataLength;
   }
 
   // Lets you use EventEmitter.once with a timeout
