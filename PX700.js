@@ -224,10 +224,14 @@ class PX700 extends EventEmitter {
     var self = this;
 
     var handler = function () {
-      clearTimeout(timer);
       var args = Array.prototype.slice.call(arguments);
       args.unshift(null); // 'err'
-      callback.apply(this, args);
+      var continueListening = callback.apply(this, args);
+      
+      if (!continueListening) {
+        clearTimeout(timer);
+        self.removeListener(handler);
+      }
     };
 
     timer = setTimeout(function () {
@@ -235,7 +239,7 @@ class PX700 extends EventEmitter {
       callback(new Error("Timed out"));
     }, timeout);
 
-    self.once(event, handler);
+    self.on(event, handler);
   }
 
   // Only use after open
@@ -275,7 +279,7 @@ class PX700 extends EventEmitter {
 
     // Send command, then wait for echo and ACK
     this.sendString(string + checksum.toString(16), function (err) {
-      // Should get echo first
+      var n = 0;
       self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
         if (err) {
           callback(err);
@@ -284,25 +288,33 @@ class PX700 extends EventEmitter {
 
         if (msg.command == command) {
           // Good echo
-          if (skipAck) {
+          n++;
+          if (n == 2 || skipAck) {
             callback();
           } else {
-            // Wait for ACK
-            self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
-              if (err) {
-                callback(err);
-                return;
-              }
-
-              if (msg.command == 'acknowledge') {
-                callback();
-              } else {
-                callback(new Error("Bad ACK", msg));
-              }
-            });
+            // Wait for ACK / other message
           }
         } else {
-          callback(new Error("Bad echo (got " + msg.command + ", expecting " + command + ")", msg));
+          // continue listening
+          return true;
+        }
+      });
+      
+      self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
+        if (err) {
+          callback(err);
+          return;
+        }
+
+        if (msg.command == 'acknowledge') {
+          // Good ACK
+          n++;
+          if (n == 2) {
+            callback();
+          }
+        } else {
+          // continue listening
+          return true;
         }
       });
     });
