@@ -129,7 +129,7 @@ class PX700 extends EventEmitter {
           // Clear buffer
           buffer = null;
         } else {
-          buffer = buffer.slice(bytesUsed);
+          buffer = new Buffer(buffer.slice(bytesUsed));
         }
       });
 
@@ -141,7 +141,7 @@ class PX700 extends EventEmitter {
 
   parseIncomingData(buffer) {
 
-    if (buffer.length < 5) {
+    if (buffer.length < 6) {
       //console.log("Message too short (" + buffer.length + "), skipping message");
       return 0; // Still too short
     }
@@ -181,7 +181,7 @@ class PX700 extends EventEmitter {
     var dataLength = 0;
     if (CondiCommandDataLengths[deviceTypeByte] && CondiCommandDataLengths[deviceTypeByte][command]) {
       dataLength = CondiCommandDataLengths[deviceTypeByte][command];
-      if (buffer.length < (5 + dataLength)) {
+      if (buffer.length < (6 + dataLength)) {
         return 0; // Entire message not yet received
       }
       data = buffer.slice(5, 5 + dataLength);
@@ -215,7 +215,7 @@ class PX700 extends EventEmitter {
       this.parseIncomingData(buffer.slice(6 + dataLength));
     }
     
-    return 5 + dataLength;
+    return 6 + dataLength;
   }
 
   // Lets you use EventEmitter.once with a timeout
