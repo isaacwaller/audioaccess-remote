@@ -222,7 +222,6 @@ class PX700 extends EventEmitter {
   onceTimeout(event, timeout, callback) {
     var timer;
     var self = this;
-    var handler_reference;
 
     var handler = function () {
       var args = Array.prototype.slice.call(arguments);
@@ -231,10 +230,9 @@ class PX700 extends EventEmitter {
       
       if (!continueListening) {
         clearTimeout(timer);
-        self.removeListener(handler_reference);
+        self.removeListener(event, handler);
       }
     };
-    handler_reference = handler;
 
     timer = setTimeout(function () {
       self.removeListener(event, handler);
