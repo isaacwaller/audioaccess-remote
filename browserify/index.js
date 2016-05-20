@@ -90,7 +90,7 @@ function updateAllData() {
   });
 }
 function updateRoomData(roomId, callback) {
-  request({ url: '/api/rooms/' + roomId, json: true }, function (err, response) {
+  request({ url: '/api/rooms/' + roomId + '?cachebust=' + new Date().getTime(), json: true }, function (err, response) {
     if (err) {
       // TODO show error
       return;
