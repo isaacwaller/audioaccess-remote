@@ -300,23 +300,25 @@ class PX700 extends EventEmitter {
         }
       });
       
-      self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
-        if (err) {
-          callback(err);
-          return;
-        }
-
-        if (msg.command == 'acknowledge') {
-          // Good ACK
-          n++;
-          if (n == 2) {
-            callback();
+      if (!skipAck) {
+        self.onceTimeout('computer-message', ACK_TIMEOUT, function (err, msg) {
+          if (err) {
+            callback(err);
+            return;
           }
-        } else {
-          // continue listening
-          return true;
-        }
-      });
+
+          if (msg.command == 'acknowledge') {
+            // Good ACK
+            n++;
+            if (n == 2) {
+              callback();
+            }
+          } else {
+            // continue listening
+            return true;
+          }
+        });
+       }
     });
   }
 
