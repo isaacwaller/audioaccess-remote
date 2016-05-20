@@ -19,8 +19,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.get('/javascripts/index.js', browserify('./public/javascripts/index.js', { transform: [ [ "babelify", {presets: ["es2015", "react"]} ] ] }));
-app.get('/javascripts/intercom.js', browserify('./public/javascripts/intercom.js', { transform: [ [ "babelify", {presets: ["es2015", "react"]} ] ] }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', api);
